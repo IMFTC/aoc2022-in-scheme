@@ -51,11 +51,12 @@
         (else 0)))
 
 (define (main args)
-  (let* ((games (call-with-input-file input
-                  (lambda (port)
-                    (string-split
-                     (get-string-all port)
-                     #\newline))))
+  (let* ((games
+          (string-split
+           (call-with-input-file input
+             (lambda (port)
+               (get-string-all port)))
+           #\newline))
          (sol1 (apply +
                 (map get-score
                      games))))
