@@ -17,9 +17,10 @@
 ;;; + 0 if we lost, 3 for a draw, 6 if we won
 (define input "input.txt")
 
-;; The i-th index contains what i beats, where i and the content is
-;; one of 0: rock, 1: paper, 2: scissors.
-(define beats #1(2 0 1))
+
+(define (beats play)
+  ;; 0(rock) <beats 1(paper) <beats 2(scissors) <beats 0(rock)
+  (floor-remainder (- play 1) 3))
 
 ;;; Create an array that maps the two indices OP and WE -> score
 ;;; with indices 0: rock, 1: paper, 2: scissors.
@@ -32,33 +33,46 @@
  points-array
  (lambda (op we)
    (+ (cond
-       ((= (array-ref beats we) op) 6)  ; 6 points if we win
+       ((= (beats we) op) 6)            ; 6 points if we win
        ((= op we) 3)                    ; 3 points if we draw
        (else 0))                        ; 0 points if we loose
       (+ we 1))))                       ; additional 1, 2, 3 points if
                                         ; WE play rock, paper,
                                         ; scissors
 
-(define (get-score game)
-  "Takes a string like \"A Y\" and returns the score."
-  (cond ((= (string-length game) 3)
-         (let* ((chars (string->list game))
+(define move-array (make-array 0 3 3))
+(array-index-map!
+ move-array
+ (lambda (op outcome)
+   (case outcome
+     ((0) (beats op))                   ; we must loose
+     ((1) op)                           ; we must draw
+     ((2) (beats (beats op))))))        ; we must win
+
+(define (get-score game-line solution-part)
+  "Takes a string GAME of the form \"A Y\" and returns the score."
+  (cond ((= (string-length game-line) 3)
+         (let* ((chars (string->list game-line))
                 (op (- (char->integer (list-ref chars 0))
                        (char->integer #\A)))
                 (we (- (char->integer (list-ref chars 2))
                        (char->integer #\X))))
-           (array-ref points-array op we)))
+           (array-ref points-array
+                      op
+                      (case solution-part
+                        ((1) we)
+                        ((2) (array-ref move-array op we))))))
         (else 0)))
 
 (define (main args)
   (let* ((games
           (string-split
            (call-with-input-file input
-             (lambda (port)
-               (get-string-all port)))
+             (lambda (port) (get-string-all port)))
            #\newline))
-         (sol1 (apply +
-                (map get-score
-                     games))))
+         (sol1 (apply +(map (lambda (g) (get-score g 1)) games)))
+         (sol2 (apply +(map (lambda (g) (get-score g 2)) games))))
     (assert (= 14375 sol1))
-    (format #t "Solution 1: ~a\n" sol1)))
+    (assert (= 10274 sol2))
+    (format #t "Solution 1: ~a\n" sol1)
+    (format #t "Solution 2: ~a\n" sol2)))
