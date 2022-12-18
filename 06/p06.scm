@@ -26,16 +26,18 @@
         (chars '()))
     ;; runs in O(1)
     (define (push c)
-      ;; if the queue is full, first pop the oldest item
       (if (>= total-chars size)
+          ;; if the queue is full, first pop the oldest item
           (let* ((dequeued (deq! q))
                  (n (bytevector-u8-ref occurrences dequeued)))
             (bytevector-u8-set! occurrences dequeued (1- n))
             (when (= n 1)
-              (set! unique-chars (1- unique-chars)))))
+              (set! unique-chars (1- unique-chars))))
+
+          ;; the queue was not full yet
+          (set! total-chars (1+ total-chars)))
       ;; push the new char to the queue
       (enq! q c)
-      (set! total-chars (1+ total-chars))
       (let ((n (bytevector-u8-ref occurrences c)))
         (bytevector-u8-set! occurrences c (1+ n))
         (when (= n 0)
