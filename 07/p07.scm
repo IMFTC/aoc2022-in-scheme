@@ -57,8 +57,7 @@ returned and PORT is ready for PARSE-CD-COMMANDS."
     "Returns the directory in which we end up, leaves PORT ready for
 PARSE-DIR-CONTENT with the returned DIR."
     (let loop ((cwd start-dir))
-      (let* ((offset (ftell port))
-             (line (get-line port)))
+      (let* ((line (get-line port)))
         (match (string-split line #\space)
           (("$" "ls")
            cwd)
@@ -119,18 +118,16 @@ PARSE-DIR-CONTENT with the returned DIR."
   (let* ((input-file (if (null? (cdr args)) input (cadr args)))
          (root (parse-file-system-tree input-file))
          (tree-post-order (get-tree-in-post-order root))
-         (sol1 (apply +
-                (map (lambda (n) (file-size n))
-                     (get-dirs-with-size
-                      'max
-                      100000
-                      tree-post-order))))
-         (sol2 (apply min
-                      (map (lambda (n) (file-size n))
-                           (get-dirs-with-size
-                            'min
-                            (- 30000000 (- 70000000 (file-size root)))
-                            tree-post-order)))))
+         (sol1 (apply + (map (lambda (n) (file-size n))
+                             (get-dirs-with-size
+                              'max
+                              100000
+                              tree-post-order))))
+         (sol2 (apply min (map (lambda (n) (file-size n))
+                               (get-dirs-with-size
+                                'min
+                                (- 30000000 (- 70000000 (file-size root)))
+                                tree-post-order)))))
 
     (when (null? (cdr args))
       (or (= sol1 1583951) (error "Wrong solution sol1!"))
