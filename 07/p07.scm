@@ -30,76 +30,55 @@
   "Returns a record of type <file> with the file-name \"root\" with
 file-content populated recursively as parsed from the shell output in
 FILE."
-  (define root (make-file "/" 'directory #f '? #f))
-  (define (parse-dir-content! dir port)
-    "Parse the content of DIR (<file> type) from PORT and set the content
-list of DIR. Returns #f of eof-object was read, otherwise #t is
-returned and PORT is ready for PARSE-CD-COMMANDS."
-    (let loop ((content '()))
-      (let* ((offset (ftell port))
-             (line (get-line port)))
-        (cond ((eof-object? line)
-               (set-file-content! dir content)
-               #f)
-              ((or (string-null? line)
-                   (string-prefix? "$" line))
-               (seek port offset SEEK_SET)
-               (set-file-content! dir content)
-               #t)
-              (else
-               (match (string-split line #\space)
-                 (("dir" name)
-                  (loop (cons (make-file name 'directory #f '? dir) content)))
-                 ((size name)
-                  (loop (cons (make-file name 'file (string->number size) #f dir) content)))))))))
-
-  (define (parse-cd-commands start-dir port)
-    "Returns the directory in which we end up, leaves PORT ready for
-PARSE-DIR-CONTENT with the returned DIR."
-    (let loop ((cwd start-dir))
-      (let* ((line (get-line port)))
-        (match (string-split line #\space)
-          (("$" "ls")
-           cwd)
-          (("$" "cd" "/") ; special case hack since start dir is unknown
-           (loop root))
-          (("$" "cd" "..")
-           (loop (file-parent cwd)))
-          (("$" "cd" target-dir)
-           (loop (find (lambda (f) (equal? (file-name f) target-dir))
-                       (file-content cwd))))))))
+  (define root (make-file "/" 'directory #f '() #f))
   (call-with-input-file file
     (lambda (port)
-      (let loop ((dir (parse-cd-commands #f port)))
-        (if (parse-dir-content! dir port)
-            (loop (parse-cd-commands dir port))
-            root)))))
+      (let loop ((cwd root))            ; hack: start dir is actually unknown
+        (define line (get-line port))
+        (if (eof-object? line)
+            root
+            (match (string-split line #\space)
+              (("$" "cd" "/")
+               (loop root))
+              (("$" "cd" "..")
+               (loop (file-parent cwd)))
+              (("$" "cd" target-dir)
+               (loop (find (lambda (f) (equal? (file-name f) target-dir))
+                           (file-content cwd))))
+              ((or ("$" "ls") "")
+               (loop cwd))
+              (("dir" name)
+               (set-file-content! cwd (cons (make-file name 'directory #f '() cwd)
+                                            (file-content cwd)))
+               (loop cwd))
+              ((size name)
+               (set-file-content! cwd (cons (make-file name 'file (string->number size) #f cwd)
+                                            (file-content cwd)))
+               (loop cwd))))))))
 
-(define (get-tree-in-post-order fs-root)
-  "Return a list with all files and directories in post order."
-  ;; This procedure is tail recursive (it uses a list as a stack).
-  (define (walk todo-stack
-                nodes-in-post-order)
+(define (get-tree-in-post-order root)
+  "Return a list with all files and directories in post order and sets
+the directory size of each directory based on its content."
+  (let loop ((todo-stack (list root))
+             (nodes-in-post-order '()))
     (cond ((null? todo-stack)
            ;; before returning calculate and set dir sizes
            (map
             (lambda (node)
               (if (eq? (file-type node) 'directory)
-                  ;; Since the list is in post-order, it's
-                  ;; guaranteed that the size of all contained dirs
-                  ;; has already been already set.
+                  ;; post-order list guarantees contained dirs' sizes are set
                   (set-file-size! node (apply + (map file-size (file-content node)))))
               (format #t "~10a ~a\n" (file-size node) (get-canonical-path node))
               node)
             nodes-in-post-order))       ; return result
           (else
            (let ((node (car todo-stack)))
+             (format #t "~a\n" (get-canonical-path node))
              (if (eq? (file-type node) 'directory)
-                 (walk (append (file-content node) (cdr todo-stack))
+                 (loop (append (file-content node) (cdr todo-stack))
                        (cons node nodes-in-post-order))
-                 (walk (cdr todo-stack)
-                       (cons node nodes-in-post-order)))))))
-  (walk (list fs-root) '()))
+                 (loop (cdr todo-stack)
+                       (cons node nodes-in-post-order))))))))
 
 (define (get-dirs-with-size minmax size tree-list)
   (filter-map
@@ -118,17 +97,13 @@ PARSE-DIR-CONTENT with the returned DIR."
   (let* ((input-file (if (null? (cdr args)) input (cadr args)))
          (root (parse-file-system-tree input-file))
          (tree-post-order (get-tree-in-post-order root))
-         (sol1 (apply + (map (lambda (n) (file-size n))
-                             (get-dirs-with-size
-                              'max
-                              100000
-                              tree-post-order))))
-         (sol2 (apply min (map (lambda (n) (file-size n))
-                               (get-dirs-with-size
-                                'min
-                                (- 30000000 (- 70000000 (file-size root)))
-                                tree-post-order)))))
 
+         (sol1 (apply + (map (lambda (n) (file-size n))
+                             (get-dirs-with-size 'max 100000
+                                                 tree-post-order))))
+         (sol2 (apply min (map (lambda (n) (file-size n))
+                               (get-dirs-with-size 'min (- 30000000 (- 70000000 (file-size root)))
+                                                   tree-post-order)))))
     (when (null? (cdr args))
       (or (= sol1 1583951) (error "Wrong solution sol1!"))
       (or (= sol2 214171) (error "Wrong solution sol2!")))
