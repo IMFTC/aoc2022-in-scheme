@@ -73,7 +73,6 @@ the directory size of each directory based on its content."
             nodes-in-post-order))       ; return result
           (else
            (let ((node (car todo-stack)))
-             (format #t "~a\n" (get-canonical-path node))
              (if (eq? (file-type node) 'directory)
                  (loop (append (file-content node) (cdr todo-stack))
                        (cons node nodes-in-post-order))
