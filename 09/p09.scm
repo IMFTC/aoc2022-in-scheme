@@ -4,8 +4,7 @@
 
 (use-modules (ice-9 textual-ports)
              (ice-9 match)
-             (srfi srfi-26)
-             (srfi srfi-1))
+             (srfi srfi-26))
 
 (define input "input.txt")
 
@@ -17,7 +16,7 @@
 (define (make-computer)
   (define (run-program program-text n-knots)
     "Run the string PROGRAM-TEXT as a program and return the number of
-spaces visited by TAIL of a robe with N-KNOTS knots."
+spaces visited by TAIL of a rope with N-KNOTS knots."
     (let* ((count-visits-ht (make-hash-table))
            (get-x (cut s64vector-ref <> 0))
            (get-y (cut s64vector-ref <> 1))
@@ -78,7 +77,7 @@ spaces visited by TAIL of a robe with N-KNOTS knots."
                    (hash-set! count-visits-ht (cons (get-x tail) (get-y tail))
                               (1+ (hash-ref count-visits-ht (cons (get-x tail) (get-y tail)) 0)))
                    (loop (1- steps))))))))
-        (map exec-instruction (string-split program-text #\newline))
+        (for-each exec-instruction (string-split program-text #\newline))
         (hash-count (const #t) count-visits-ht))))
 
   (lambda args
