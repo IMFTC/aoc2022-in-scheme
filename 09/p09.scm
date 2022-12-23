@@ -17,7 +17,7 @@
 (define (make-computer)
   (define (run-program program-text n-knots)
     "Run the string PROGRAM-TEXT as a program and return the number of
-spaces visited by HEAD."
+spaces visited by TAIL of a robe with N-KNOTS knots."
     (let* ((count-visits-ht (make-hash-table))
            (get-x (cut s64vector-ref <> 0))
            (get-y (cut s64vector-ref <> 1))
