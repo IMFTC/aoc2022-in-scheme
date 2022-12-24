@@ -2,8 +2,7 @@
 -e main -s
 !#
 
-(use-modules (ice-9 textual-ports)
-             (rnrs base))
+(use-modules (ice-9 textual-ports))
 
 ;;; First char in each row is what opponent will play
 ;;; A: rock, B: paper, C: scissors
@@ -64,15 +63,19 @@
                         ((2) (array-ref move-array op we))))))
         (else 0)))
 
+(define (get-games file)
+  (string-split
+   (call-with-input-file file
+     (lambda (port) (get-string-all port)))
+   #\newline))
+
 (define (main args)
-  (let* ((games
-          (string-split
-           (call-with-input-file input
-             (lambda (port) (get-string-all port)))
-           #\newline))
+  (let* ((input-file (if (null? (cdr args)) input (cadr args)))
+         (games (get-games input-file))
          (sol1 (apply +(map (lambda (g) (get-score g 1)) games)))
          (sol2 (apply +(map (lambda (g) (get-score g 2)) games))))
-    (assert (= 14375 sol1))
-    (assert (= 10274 sol2))
+    (when (null? (cdr args))
+      (unless (= sol1 14375) (error "Wrong solution sol1!"))
+      (unless (= sol2 10274) (error "Wrong solution sol2!")))
     (format #t "Solution 1: ~a\n" sol1)
     (format #t "Solution 2: ~a\n" sol2)))
