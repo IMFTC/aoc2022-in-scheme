@@ -3,10 +3,9 @@
 !#
 
 (use-modules (ice-9 textual-ports)
-             (ice-9 control)
+             (ice-9 control)            ; call/ec
              (ice-9 match)
-             (srfi srfi-1)
-             (rnrs base))
+             (srfi srfi-1))
 
 (define input "input.txt")
 
@@ -77,7 +76,8 @@ priority."
   (apply + (map get-priority rucksacks)))
 
 (define* (solution-2 rucksacks)
-  (assert (= (remainder (length rucksacks) 3) 0))
+  (unless (= (remainder (length rucksacks) 3) 0)
+    (error "Number of rucksacks is not a multiple of 3!"))
   (let loop ((rest rucksacks)
              (sum 0))
     (match rest
@@ -85,27 +85,31 @@ priority."
       ((r1 r2 r3 . rest)
        (loop rest (+ sum (get-group-priority (list r1 r2 r3))))))))
 
-(define (load-rucksacks file)
+(define (get-rucksacks file)
   "Processes the input file and return a list of strings, where each
 string represents the content of a single rucksack. "
   (filter-map (lambda (line)
                 (if (string-null? line) #f line))
-   (string-split
-    (call-with-input-file file
-      (lambda (port)
-        (get-string-all port)))
-    #\newline)))
+              (string-split
+               (call-with-input-file file
+                 (lambda (port)
+                   (get-string-all port)))
+               #\newline)))
 
 (define (main args)
-  (assert (= (vector-ref char->priority (char->integer #\a)) 1))
-  (assert (= (vector-ref char->priority (char->integer #\z)) 26))
-  (assert (= (vector-ref char->priority (char->integer #\A)) 27))
-  (assert (= (vector-ref char->priority (char->integer #\Z)) 52))
+  (unless
+      (and (= (vector-ref char->priority (char->integer #\a)) 1)
+           (= (vector-ref char->priority (char->integer #\z)) 26)
+           (= (vector-ref char->priority (char->integer #\A)) 27)
+           (= (vector-ref char->priority (char->integer #\Z)) 52))
+    (error "Error in char->priority vector!"))
 
-  (let* ((rucksacks (load-rucksacks input))
+  (let* ((input-file (if (null? (cdr args)) input (cadr args)))
+         (rucksacks (get-rucksacks input))
          (sol1 (solution-1 rucksacks))
          (sol2 (solution-2 rucksacks)))
-    (assert (= sol1 7848))
-    (assert (= sol2 2616))
+    (when (null? (cdr args))
+      (unless (= sol1 7848) (error "Wrong solution sol1!"))
+      (unless (= sol2 2616) (error "Wrong solution sol2!")))
     (format #t "Solution 1: ~a\n" sol1)
     (format #t "Solution 2: ~a\n" sol2)))
