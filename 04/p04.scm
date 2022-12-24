@@ -4,8 +4,7 @@
 
 (use-modules (ice-9 textual-ports)
              (ice-9 match)
-             (srfi srfi-1)
-             (ice-9 exceptions))
+             (srfi srfi-1))
 
 (define input "input.txt")
 
@@ -54,7 +53,7 @@
          (sol1 (solution-1 assignments))
          (sol2 (solution-2 assignments)))
     (when (null? (cdr args))
-      (or (= sol1 503) (raise-exception "Wrong solution sol1!"))
-      (or (= sol2 827) (raise-exception "Wrong solution sol2!")))
+      (unless (= sol1 503) (raise-exception "Wrong solution sol1!"))
+      (unless (= sol2 827) (raise-exception "Wrong solution sol2!")))
     (format #t "Solution 1: ~a\n" sol1)
     (format #t "Solution 2: ~a\n" sol2)))
