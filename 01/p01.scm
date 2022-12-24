@@ -2,82 +2,35 @@
 -e main -s
 !#
 
-(use-modules (ice-9 textual-ports)
-             (rnrs base)
-             (ice-9 match)
-             (srfi srfi-1))
+(use-modules (ice-9 textual-ports))
 
 (define input "input.txt")
 
-(define (partition-list lst)
-  "Return a list of lists, where the first list holds the elements of
-LST up to the first #f element, the 2nd list all elements between the
-first occurrence of #f and so on."
-  (fold (lambda (e prev)
-          (cond (e (set-car! prev (cons e (car prev)))
-                   prev)
-                (else (cons '() prev))))
-        (list '())                      ;; not '(())!
-        lst))
-
-(define (sum-lists lsts)
-  "((1 2) () (3) (4 5)) -> (3 0 3 9)"
-  (fold (lambda (l prev)
-          (cons (apply + l) prev))
-        '()
-        lsts))
-
-(define (solution-1b)
-  (apply max
-         (sum-lists
-          (partition-list
-           (map string->number
-                (string-split
-                 (call-with-input-file input
-                   (lambda (port)
-                     (get-string-all port)))
-                 #\newline))))))
-
-(define (solution-1a)
+(define (get-sorted-sums file)
   (call-with-input-file input
     (lambda (port)
       (let loop ((line (get-line port))
                  (current-sum 0)
-                 (max-sum 0))
+                 (list-of-sums '()))
         (cond ((eof-object? line)
-               (max max-sum current-sum))
+               (sort list-of-sums >))
               ((string-null? line)
                (loop (get-line port)
                      0
-                     (max max-sum current-sum)))
+                     (cons current-sum list-of-sums)))
               (else
                (let ((n (string->number line)))
                  (loop (get-line port)
                        (+ current-sum n)
-                       max-sum))))))))
-
-(define (solution-2)
-  (call-with-input-file input
-    (lambda (port)
-      (apply +
-       (list-head
-        (sort
-         (sum-lists
-          (partition-list
-           (map string->number
-                (string-split
-                 (get-string-all port)
-                 #\newline))))
-         >)
-        3)))))
+                       list-of-sums))))))))
 
 (define (main args)
-  (let ((sol1a (solution-1a))
-        (sol1b (solution-1b))
-        (sol2 (solution-2)))
-    (assert (= sol1a 71300))
-    (assert (= sol1b 71300))
-    (assert (= sol2 209691))
-    (format #t "solution 1a: ~a\n" sol1a)
-    (format #t "solution 1b: ~a\n" sol1b)
-    (format #t "solution 2: ~a\n" sol2)))
+  (let* ((input-file (if (null? (cdr args)) input (cadr args)))
+         (sorted-sums (get-sorted-sums input-file))
+         (sol1 (apply + (list-head sorted-sums 1)))
+         (sol2 (apply + (list-head sorted-sums 3))))
+    (when (null? (cdr args))
+      (unless (= sol1 71300) (error "Wrong solution sol1!"))
+      (unless (= sol2 209691) (error "Wrong solution sol2!")))
+    (format #t "Solution 1: ~a\n" sol1)
+    (format #t "Solution 2: ~a\n" sol2)))
