@@ -3,12 +3,8 @@
 !#
 
 (use-modules (ice-9 textual-ports)
-             (ice-9 match)
-             (ice-9 binary-ports)
-             (rnrs bytevectors)
-             (srfi srfi-1))
+             (ice-9 match))
 
-;(define input "test.txt")
 (define input "input.txt")
 
 (define (parse-array-from-file file)
@@ -28,6 +24,7 @@
     ;; First we create a new array of the same size to mark seen
     ;; trees.
     (let ((seen-trees (make-typed-array 'u8 0 rows cols)))
+
       (define (mark-rows array seen-trees fwd-seen-val bkd-seen-val)
         (let loop-rows ((r 0))
           (when (< r rows)
@@ -52,6 +49,7 @@
                                   (+ (array-ref seen-trees r c) bkd-seen-val) r c))
                     (loop-cols-backward (1- c) (max height max-height))))))
             (loop-rows (1+ r)))))
+
       (mark-rows array seen-trees 1 2)
       ;; Run the same function on a shared transposed array (colums <-> rows)
       (mark-rows (make-shared-array array (lambda (x y) (list y x)) cols rows)
@@ -66,6 +64,7 @@
 (define (get-highest-scenic-score array)
   (match-let (((rows cols) (array-dimensions array)))
     (let ((scenic-score (make-typed-array 'u32 1 rows cols)))
+
       (define (scenic-for-rows coord-transform rows cols)
         (let ((array (make-shared-array array coord-transform rows cols))
               (scenic-score (make-shared-array scenic-score coord-transform rows cols)))
@@ -101,9 +100,11 @@
                  (list (lambda (r c) (list r (- cols c 1))) rows cols) ; rows right
                  (list (lambda (r c) (list c r)) cols rows) ; cols up
                  (list (lambda (r c) (list (- rows c 1) r)) cols rows))) ; cols down
+
       (let ((max-score 0))
-        (array-for-each (lambda (score) (if (> score max-score)
-                                            (set! max-score score)))
+        (array-for-each (lambda (score)
+                          (if (> score max-score)
+                              (set! max-score score)))
                         scenic-score)
         max-score))))
 
