@@ -35,12 +35,11 @@
               (let loop-cols-forward ((c 0) (max-height -1))
                 (when (< c cols)
                   (let ((height (array-ref array r c)))
-                    (cond ((> height max-height)
-                           (array-set! seen-trees fwd-seen-val r c)
-                           ;; remember the column index of the last tree seen from the 'left'
-                           (set! last-seen-forward c)
-                           (loop-cols-forward (1+ c) height))
-                          ((loop-cols-forward (1+ c) max-height))))))
+                    (when (> height max-height)
+                      (array-set! seen-trees fwd-seen-val r c)
+                      ;; remember the column index of the last tree seen from the 'left'
+                      (set! last-seen-forward c))
+                    (loop-cols-forward (1+ c) (max height max-height)))))
               (let loop-cols-backward ((c (1- cols)) (max-height -1))
                 ;; When looking from the right we only have to check
                 ;; trees up to (and including) the last tree seen from
@@ -48,11 +47,10 @@
                 ;; and therefore can't be visible from the right.
                 (when (>= c last-seen-forward)
                   (let ((height (array-ref array r c)))
-                    (cond ((> height max-height)
-                           (array-set! seen-trees
-                                       (+ (array-ref seen-trees r c) bkd-seen-val) r c)
-                           (loop-cols-backward (1- c) height))
-                          ((loop-cols-backward (1- c) max-height)))))))
+                    (when (> height max-height)
+                      (array-set! seen-trees
+                                  (+ (array-ref seen-trees r c) bkd-seen-val) r c))
+                    (loop-cols-backward (1- c) (max height max-height))))))
             (loop-rows (1+ r)))))
       (mark-rows array seen-trees 1 2)
       ;; Run the same function on a shared transposed array (colums <-> rows)
@@ -60,8 +58,9 @@
                  (make-shared-array seen-trees (lambda (x y) (list y x)) cols rows) 4 8)
       ;; (print-array seen-trees)
       (let ((count 0))
-        (array-for-each (lambda (e) (if (> e 0) (set! count (1+ count))))
-                        seen-trees)
+        (array-for-each
+         (lambda (e) (if (> e 0) (set! count (1+ count))))
+         seen-trees)
         count))))
 
 (define (get-highest-scenic-score array)
