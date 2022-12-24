@@ -4,8 +4,8 @@
 
 (use-modules (ice-9 textual-ports)
              (ice-9 match)
-             (srfi srfi-1)
-             (srfi srfi-9))             ;records
+             (srfi srfi-1)              ; find
+             (srfi srfi-9))             ; records
 
 (define input "input.txt")
 
@@ -96,7 +96,6 @@ the directory size of each directory based on its content."
   (let* ((input-file (if (null? (cdr args)) input (cadr args)))
          (root (parse-file-system-tree input-file))
          (tree-post-order (get-tree-in-post-order root))
-
          (sol1 (apply + (map (lambda (n) (file-size n))
                              (get-dirs-with-size 'max 100000
                                                  tree-post-order))))
