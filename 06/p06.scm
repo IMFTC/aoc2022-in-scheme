@@ -2,12 +2,9 @@
 -e main -s
 !#
 
-(use-modules (ice-9 match)
-             (ice-9 q)
+(use-modules (ice-9 q)
              (ice-9 binary-ports)
-             (ice-9 textual-ports)
-             (rnrs bytevectors)
-             (srfi srfi-1))
+             (rnrs bytevectors))
 
 (define input "input.txt")
 
@@ -33,7 +30,6 @@
             (bytevector-u8-set! occurrences dequeued (1- n))
             (when (= n 1)
               (set! unique-chars (1- unique-chars))))
-
           ;; the queue was not full yet
           (set! total-chars (1+ total-chars)))
       ;; push the new char to the queue
