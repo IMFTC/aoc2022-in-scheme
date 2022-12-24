@@ -4,7 +4,7 @@
 
 (use-modules (ice-9 textual-ports)
              (ice-9 match)
-             (srfi srfi-26))
+             (srfi srfi-26))            ; cut
 
 (define input "input.txt")
 
@@ -35,10 +35,12 @@ spaces visited by TAIL of a rope with N-KNOTS knots."
         (unless (null? rest)
           (set-car! rest (make-s64vector 2 0))
           (loop (cdr rest))))
+
       (let ((head (car knots))
             (tail (car (last-pair knots))))
         ;; assume start position (0, 0)
         (hash-set! count-visits-ht (cons 0 0) 1)
+
         (define (exec-instruction instruction)
           (match (string-split instruction #\space)
             (("") #f)
@@ -77,6 +79,7 @@ spaces visited by TAIL of a rope with N-KNOTS knots."
                    (hash-set! count-visits-ht (cons (get-x tail) (get-y tail))
                               (1+ (hash-ref count-visits-ht (cons (get-x tail) (get-y tail)) 0)))
                    (loop (1- steps))))))))
+
         (for-each exec-instruction (string-split program-text #\newline))
         (hash-count (const #t) count-visits-ht))))
 
