@@ -12,7 +12,7 @@
 
 (define aoc-skel-file "skel.scm")
 
-(define cookie-file "session-cookie")
+(define aoc-cookie-file "session-cookie")
 
 (define (main args)
   (let ((arg1 (cdr args)))
@@ -25,13 +25,13 @@ Usage: ~a DAY\nDAY is a number 1..24."
            (number-string (format #f "~2,'0d" day))
            (program-file (string-append number-string "/" "p" number-string ".scm"))
            (input-file (string-append number-string "/" "input.txt")))
-      (format #t "Creating directory \"~a\"\n" number-string)
+      (format #t "Creating directory '~a'\n" number-string)
       (mkdir number-string)
-      (format #t "Copying skel.scm to \"~a\"\n" program-file)
+      (format #t "Copying '~a' to '~a'\n" aoc-skel-file program-file)
       (copy-file aoc-skel-file program-file)
-      (format #t "chmod 755 ~a\n" program-file)
+      (format #t "chmod 755 '~a'\n" program-file)
       (chmod program-file #o755)
-      (let ((cookie-string (call-with-input-file cookie-file
+      (let ((cookie-string (call-with-input-file aoc-cookie-file
                              (lambda (port) (get-line port)))))
         (receive (response body)
             (http-get (string-append
@@ -39,8 +39,9 @@ Usage: ~a DAY\nDAY is a number 1..24."
                        (number->string day) "/input")
                       #:headers `((cookie . ,cookie-string)))
           (format #t "response: ~a\n" (response-code response))
-          (format #t "Writing input data to ~a\n" input-file)
+          (format #t "Writing input data to '~a'\n" input-file)
           (call-with-output-file input-file
             (lambda (port)
               (put-string port body)
+              (format #t "chmod 444 '~a'\n" program-file)
               (chmod port #o444))))))))
