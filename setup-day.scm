@@ -11,7 +11,6 @@
              (web response))
 
 (define aoc-skel-file "skel.scm")
-
 (define aoc-cookie-file "session-cookie")
 
 (define (main args)
@@ -31,8 +30,7 @@ Usage: ~a DAY\nDAY is a number 1..24."
       (copy-file aoc-skel-file program-file)
       (format #t "chmod 755 '~a'\n" program-file)
       (chmod program-file #o755)
-      (let ((cookie-string (call-with-input-file aoc-cookie-file
-                             (lambda (port) (get-line port)))))
+      (let ((cookie-string (call-with-input-file aoc-cookie-file get-line)))
         (receive (response body)
             (http-get (string-append
                        "https://adventofcode.com/2022/day/"
