@@ -16,7 +16,6 @@
 ;;; + 0 if we lost, 3 for a draw, 6 if we won
 (define input "input.txt")
 
-
 (define (beats play)
   ;; 0(rock) <beats 1(paper) <beats 2(scissors) <beats 0(rock)
   (floor-remainder (- play 1) 3))
@@ -49,7 +48,6 @@
      ((2) (beats (beats op))))))        ; we must win
 
 (define (get-score game-line solution-part)
-  "Takes a string GAME of the form \"A Y\" and returns the score."
   (cond ((= (string-length game-line) 3)
          (let* ((chars (string->list game-line))
                 (op (- (char->integer (list-ref chars 0))
@@ -72,8 +70,8 @@
 (define (main args)
   (let* ((input-file (if (null? (cdr args)) input (cadr args)))
          (games (get-games input-file))
-         (sol1 (apply +(map (lambda (g) (get-score g 1)) games)))
-         (sol2 (apply +(map (lambda (g) (get-score g 2)) games))))
+         (sol1 (apply + (map (lambda (g) (get-score g 1)) games)))
+         (sol2 (apply + (map (lambda (g) (get-score g 2)) games))))
     (when (null? (cdr args))
       (unless (= sol1 14375) (error "Wrong solution sol1!"))
       (unless (= sol2 10274) (error "Wrong solution sol2!")))
