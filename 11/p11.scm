@@ -99,9 +99,7 @@
   ;;    a ≡ b (mod m_k) for k = 1,...,k ⇔ a ≡ b (mod m).
   ;;
   ;; (Source: Bundschuh, Einführung in die Zahlentheorie, 5. Auflage, S. 79)
-  (let ((tests-lcd (fold (lambda (monkey prev) (* prev (monkey-test monkey)))
-                             1
-                             monkey-list)))
+  (let ((tests-lcd (apply * (map monkey-test monkey-list))))
     (let loop ((rnd 0))
       (when (< rnd rounds)
         (for-each
