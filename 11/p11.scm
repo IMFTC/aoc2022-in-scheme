@@ -50,16 +50,11 @@
      ((eof-object? first-line)
       #f)                               ;signal end of file
      (else
-      ;; We don't parse the monkey number, it will be reflected by
-      ;; the monkey's position in the monkey-list returned by
-      ;; parse-monkeys-from-file.
       (unless (string-prefix? "Monkey " first-line)
         (error "First line parse-monkey read from port did not start with 'Monkey'"))
       (let* ((number (string->number (string-trim-right (substring/read-only first-line 7) #\:)))
              (items (parse-items))
              (operation (parse-operation))
-             ;; the following three are position dependent and very
-             ;; unreliable in practice
              (test (string->number (substring/read-only (get-line port) 21)))
              (if-true (string->number (substring/read-only (get-line port) 29)))
              (if-false (string->number (substring/read-only (get-line port) 30))))
@@ -77,12 +72,12 @@
               (reverse monkey-list)))))))
 
 (define* (run-monkey-rounds! monkey-list rounds #:optional (divide-worry #t))
-  ;; The numbers in part 2 get really big here and computation takes
-  ;; too long, but since we are not interested in the actual
-  ;; worry-levels but just in the remainders when dividing by any of
-  ;; the test numbers we use the fact that the test numbers are primes
-  ;; (assuming they are always primes on purpose for all inputs) and
-  ;; can just work modulo their product
+  ;; About tests-lcd: The numbers in part 2 get really big here and
+  ;; computation takes too long, but since we are not interested in
+  ;; the actual worry-levels but just in the remainders when dividing
+  ;; by any of the test numbers we use the fact that the test numbers
+  ;; are primes (assuming they are always primes on purpose for all
+  ;; inputs) and can just work modulo their product
   ;;
   ;;    test_1 * .... * test_n,
   ;;
@@ -106,20 +101,13 @@
          (lambda (monkey)
            (match monkey
              (($ <monkey> number items inspections operation test if-true if-false)
-              ;; increase the monkey's total inspection (item) count
-              ;;(format #t "round: ~a, monkey: ~a\n" rnd (monkey-number monkey))
               (set-monkey-inspections! monkey (+ (length items) inspections))
-              ;; transfer of items: we first collect the thrown items in
-              ;; two lists and when we are done we append the lists to
-              ;; the items of the other two monkeys
               (let ((monkey-true (list-ref monkey-list if-true))
                     (monkey-false (list-ref monkey-list if-false)))
-                ;;(format #t "items: ~a\n" items)
                 (let loop-items ((remaining-items items)
                                  (list-true '())
                                  (list-false '()))
                   (cond ((null? remaining-items)
-                         ;; update items lists of involved monkeys
                          (set-monkey-items! monkey '())
                          (set-monkey-items! monkey-true
                                             (append (monkey-items monkey-true)
