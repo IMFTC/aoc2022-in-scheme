@@ -77,12 +77,29 @@
               (reverse monkey-list)))))))
 
 (define* (run-monkey-rounds! monkey-list rounds #:optional (divide-worry #t))
-  ;; the numbers in part 2 get really big here and computation takes
+  ;; The numbers in part 2 get really big here and computation takes
   ;; too long, but since we are not interested in the actual
   ;; worry-levels but just in the remainders when dividing by any of
-  ;; the test numbers, we can just work modulo (* test_1 ... test_2)
-  ;; where test_i is the test number of monkey i.
-  (let ((tests-product (fold (lambda (monkey prev) (* prev (monkey-test monkey)))
+  ;; the test numbers we use the fact that the test numbers are primes
+  ;; (assuming they are always primes on purpose for all inputs) and
+  ;; can just work modulo their product
+  ;;
+  ;;    test_1 * .... * test_n,
+  ;;
+  ;; where test_i is the test number of monkey i, since this product
+  ;; is their lowest common denominator (LCD).
+  ;;
+  ;; To be more precise: we use the fact that, given integers
+  ;; m_1,...,m_k that are not 0, and
+  ;;
+  ;;    m := LCD(m_1,...,m_k),
+  ;;
+  ;; their lowest common denominator, it holds that
+  ;;
+  ;;    a ≡ b (mod m_k) for k = 1,...,k ⇔ a ≡ b (mod m).
+  ;;
+  ;; (Source: Bundschuh, Einführung in die Zahlentheorie, 5. Auflage, S. 79)
+  (let ((tests-lcd (fold (lambda (monkey prev) (* prev (monkey-test monkey)))
                              1
                              monkey-list)))
     (let loop ((rnd 0))
@@ -116,7 +133,7 @@
                          (let ((item (car remaining-items)))
                            (let* ((worry-level (if divide-worry
                                                    (floor-quotient (operation item) 3)
-                                                   (floor-remainder (operation item) tests-product)))
+                                                   (floor-remainder (operation item) tests-lcd)))
                                   (divisible (zero? (floor-remainder worry-level test))))
                              ;; (format #t "item with old wl: ~4,d, new wl: ~4,d → monkey ~a\n"
                              ;;         item worry-level (if divisible if-true if-false))
