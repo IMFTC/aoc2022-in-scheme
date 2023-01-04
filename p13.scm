@@ -14,22 +14,20 @@
   (eval-string
    (call-with-input-file file
      (lambda (file-port)
-       (bytevector->string
-        (call-with-output-bytevector
-         (lambda (out-port)
+       (call-with-output-string
+         (lambda (string-port)
            ;; Replace all #\, with #\space. Also wrap the whole file
            ;; content inside an extra "[" and "]" pair and prefix it
            ;; with "'", so we can get this outer list with eval-string,
            ;; which otherwise would return only the last list.
-           (display "'[" out-port)
+           (display "'[" string-port)
            (let loop ((byte (get-u8 file-port)))
              (unless (eof-object? byte)
-               (put-u8 out-port (if (= byte (char->integer #\,))
+               (put-u8 string-port (if (= byte (char->integer #\,))
                                     (char->integer #\space)
                                     byte))
                (loop (get-u8 file-port))))
-           (display "]" out-port)))
-        "ascii")))))
+           (display "]" string-port)))))))
 
 (define (main args)
   (let* ((input-file (if (null? (cdr args)) input (cadr args)))
