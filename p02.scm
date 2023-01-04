@@ -14,7 +14,7 @@
 ;;; Scores per round:
 ;;; 1, 2, 3 points if WE play rock, paper, scissors
 ;;; + 0 if we lost, 3 for a draw, 6 if we won
-(define input "input.txt")
+(define input "input02.txt")
 
 (define (beats play)
   ;; 0(rock) <beats 1(paper) <beats 2(scissors) <beats 0(rock)

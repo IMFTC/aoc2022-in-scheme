@@ -6,7 +6,7 @@
              (ice-9 binary-ports)
              (rnrs bytevectors))
 
-(define input "input.txt")
+(define input "input06.txt")
 
 (define (get-input-as-bytes file)
   (call-with-input-file file

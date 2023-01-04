@@ -6,7 +6,7 @@
              (ice-9 match)
              (srfi srfi-26))            ; cut
 
-(define input "input.txt")
+(define input "input09.txt")
 
 (define (get-program-text-from-file file)
   (call-with-input-file file

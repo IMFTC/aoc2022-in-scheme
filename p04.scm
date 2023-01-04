@@ -6,7 +6,7 @@
              (ice-9 match)
              (srfi srfi-1))
 
-(define input "input.txt")
+(define input "input04.txt")
 
 (define (overlapping-assignment? assignment kind)
   (match-let*

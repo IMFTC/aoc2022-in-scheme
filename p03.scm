@@ -7,7 +7,7 @@
              (ice-9 match)
              (srfi srfi-1))
 
-(define input "input.txt")
+(define input "input03.txt")
 
 ;; Create a vector acting as a hash table to map integer values of
 ;; chars to priorities. 122 is the highest int value of all chars

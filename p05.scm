@@ -6,7 +6,7 @@
              (ice-9 match)
              (rnrs bytevectors))
 
-(define input "input.txt")
+(define input "input05.txt")
 
 (define (get-input-as-bytes file)
   (call-with-input-file file

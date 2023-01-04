@@ -4,7 +4,7 @@
 
 (use-modules (ice-9 textual-ports))
 
-(define input "input.txt")
+(define input "input01.txt")
 
 (define (get-sorted-sums file)
   (call-with-input-file input

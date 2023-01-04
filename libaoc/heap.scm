@@ -2,7 +2,7 @@
 -e main -s
 !#
 
-(define-module (heap)
+(define-module (libaoc heap)
   #:use-module (srfi srfi-9)
   #:export (make-heap
             heap?

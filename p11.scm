@@ -9,7 +9,7 @@
              (srfi srfi-9)              ;records
              (srfi srfi-26))            ;cut
 
-(define input "input.txt")
+(define input "input11.txt")
 
 (define-record-type <monkey>
   (make-monkey number items inspections operation test if-true if-false)

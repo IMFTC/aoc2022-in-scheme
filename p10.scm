@@ -7,7 +7,7 @@
              (srfi srfi-1)
              (ice-9 textual-ports))
 
-(define input "input.txt")
+(define input "input10.txt")
 
 (define (get-signal-strength-sum file start-cycle interval)
   (call-with-input-file file

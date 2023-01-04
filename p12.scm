@@ -2,19 +2,15 @@
 -e main -s
 !#
 
-(use-modules (ice-9 format)
-             (ice-9 textual-ports)
+(use-modules (ice-9 textual-ports)
              (ice-9 receive)
              (ice-9 match)
              (ice-9 binary-ports)
-             (srfi srfi-1)              ;list-index
-             (srfi srfi-9)              ;records
-             (srfi srfi-11)
-             (srfi srfi-27)
+             (srfi srfi-11)             ;let-values
              (rnrs bytevectors)
-             (heap))
+             (libaoc heap))
 
-(define input "input.txt")
+(define input "input12.txt")
 
 (define (get-map-array-from-file file)
   "Returns 4 values: MAPVECTOR ROWS COLS (S_ROW . S_COL) (E_ROW

@@ -5,7 +5,7 @@
 (use-modules (ice-9 textual-ports)
              (ice-9 match))
 
-(define input "input.txt")
+(define input "input08.txt")
 
 (define (parse-array-from-file file)
   (call-with-input-file file

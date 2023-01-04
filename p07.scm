@@ -4,10 +4,11 @@
 
 (use-modules (ice-9 textual-ports)
              (ice-9 match)
+             (ice-9 format)
              (srfi srfi-1)              ; find
              (srfi srfi-9))             ; records
 
-(define input "input.txt")
+(define input "input07.txt")
 
 (define-record-type <file>
   (make-file name type size content parent)
@@ -68,7 +69,7 @@ the directory size of each directory based on its content."
               (if (eq? (file-type node) 'directory)
                   ;; post-order list guarantees contained dirs' sizes are set
                   (set-file-size! node (apply + (map file-size (file-content node)))))
-              (format #t "~10a ~a\n" (file-size node) (get-canonical-path node))
+              (format #t "~9,' d ~a\n" (file-size node) (get-canonical-path node))
               node)
             nodes-in-post-order))       ; return result
           (else
