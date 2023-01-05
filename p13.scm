@@ -2,10 +2,7 @@
 -e main -s
 !#
 
-(use-modules (ice-9 format)
-             (rnrs bytevectors)
-             (ice-9 iconv)
-             (ice-9 q)
+(use-modules (ice-9 q)
              (ice-9 control)
              (ice-9 binary-ports))
 
